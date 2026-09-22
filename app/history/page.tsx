@@ -1,0 +1,6 @@
+"use client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Nav } from "@/components/Nav";
+import type { AskResult } from "@/lib/types";
+export default function HistoryPage() { const [items, setItems] = useState<Array<{ query: string; result: AskResult }>>([]); useEffect(() => { setItems(JSON.parse(localStorage.getItem("sanad-history") ?? "[]")); }, []); return <><Nav /><main className="mx-auto w-full max-w-[900px] px-5 py-16"><p className="text-xs uppercase tracking-[.18em] text-gold">History</p><h1 className="mt-4 font-display text-5xl text-text">Previous questions.</h1>{items.length ? <div className="mt-10 divide-y divide-[var(--line)] border-y border-[var(--line)]">{items.map((item, index) => <Link key={`${item.query}-${index}`} href={`/?q=${encodeURIComponent(item.query)}`} className="block py-5 text-text-muted hover:text-text"><span className="font-urdu text-lg" dir="auto">{item.query}</span><span className="mt-2 block text-xs text-text-dim">{item.result.citations.length} source{item.result.citations.length === 1 ? "" : "s"}</span></Link>)}</div> : <p className="mt-10 text-text-muted">No questions have been saved in this browser yet.</p>}</main></>; }

@@ -1,69 +1,51 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { askQuestion } from "@/lib/api";
+import type { AskResult } from "@/lib/types";
+import { useLang } from "@/lib/lang";
+import { Nav } from "@/components/Nav";
+import { QueryInput } from "@/components/QueryInput";
+import { AnswerCard } from "@/components/AnswerCard";
+import { SourceCard } from "@/components/SourceCard";
+import { NeedsReviewState } from "@/components/NeedsReviewState";
+import { VerificationBadge } from "@/components/VerificationBadge";
+import { PipelineDiagram } from "@/components/PipelineDiagram";
 
 export default function Home() {
+  const { t, lang, locale } = useLang();
+  const [query, setQuery] = useState("");
+  const [result, setResult] = useState<AskResult | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [activeCitation, setActiveCitation] = useState<number | null>(null);
+
+  async function submit() {
+    setBusy(true); setError(""); setResult(null);
+    try {
+      const next = await askQuestion(query, lang);
+      setResult(next);
+      const history = JSON.parse(localStorage.getItem("sanad-history") ?? "[]") as Array<{ query: string; result: AskResult }>;
+      localStorage.setItem("sanad-history", JSON.stringify([{ query, result: next }, ...history].slice(0, 20)));
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Something went wrong."); }
+    finally { setBusy(false); }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="min-h-screen"><Nav /><main className="mx-auto w-full max-w-[1120px] px-5 py-14 sm:py-20">
+      <section className="max-w-[760px]">
+        <p className="text-[12px] uppercase tracking-[.18em] text-gold">Sanad · {t("Evidence before certainty", "یقین سے پہلے دلیل")}</p>
+        <h1 dir={locale.dir} className="mt-4 font-display text-5xl leading-[1.05] text-text sm:text-7xl">{t("Ask. Retrieve. Verify.", "پوچھیے، تلاش کیجیے، تصدیق کیجیے۔")}</h1>
+        <p className="mt-6 max-w-[58ch] text-[16px] leading-7 text-text-muted">{t("A focused fiqh question-and-answer interface grounded in retrieved fatawa, with every passage visible for inspection.", "فقہی سوالات کے لیے ایسا نظام جو دستیاب فتاویٰ سے جواب اخذ کرتا ہے اور ہر ماخذ آپ کے سامنے رکھتا ہے۔")}</p>
+      </section>
+      <section className="mt-12"><QueryInput value={query} onChange={setQuery} onSubmit={submit} busy={busy} /></section>
+      {error && <p role="alert" className="mt-5 rounded-[var(--radius-chip)] border border-red-400/40 bg-red-950/30 p-4 text-red-200">{error}</p>}
+      {busy && <div className="panel mt-8 p-6"><PipelineDiagram activeKey="verify" compact /><p className="mt-5 text-center text-sm text-text-muted">{t("Contacting the verification service…", "تصدیقی خدمت سے رابطہ ہو رہا ہے…")}</p></div>}
+      {result && <section className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div>{result.confidence === "grounded" ? <AnswerCard answer={result.answer} citations={result.citations} activeCitation={activeCitation} onActivate={setActiveCitation} /> : <NeedsReviewState reason={result.citations.length ? "weak-match" : "no-sources"} sourceCount={result.citations.length} />}</div>
+        <aside className="space-y-4"><div className="panel p-5"><VerificationBadge confidence={result.confidence} sourceCount={result.citations.length} /><h2 className="mt-5 font-display text-xl text-text">{t("Retrieved sources", "دستیاب مآخذ")}</h2></div>{result.citations.map((citation) => <SourceCard key={citation.n} citation={citation} active={activeCitation === citation.n} onActivate={setActiveCitation} />)}</aside>
+      </section>}
+    </main>
     </div>
   );
 }

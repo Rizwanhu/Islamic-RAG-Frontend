@@ -1,26 +1,53 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #101513;
+  --foreground: #f4f0e6;
+  --ink: #101513;
+  --ink-2: #17201c;
+  --surface: #1c2923;
+  --surface-2: #24352d;
+  --text: #f4f0e6;
+  --text-muted: #b8c2ba;
+  --text-dim: #7f9185;
+  --line: #34463b;
+  --gold: #d8b66a;
+  --sage: #8fc5a0;
+  --radius-panel: 12px;
+  --radius-chip: 7px;
+  --radius-source: 9px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-dim: var(--text-dim);
+  --color-line: var(--line);
+  --color-gold: var(--gold);
+  --color-sage: var(--sage);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
+  background: radial-gradient(circle at 80% 0%, #20382d 0, var(--background) 38rem);
 }
+
+button, a { font: inherit; }
+.panel { border: 1px solid var(--line); border-radius: var(--radius-panel); background: color-mix(in srgb, var(--surface) 92%, transparent); }
+.recessed { border: 1px solid var(--line); border-radius: var(--radius-chip); background: var(--ink-2); }
+.rule { border: 0; border-top: 1px solid var(--line); }
+.link-quiet { color: var(--text-muted); transition: color .15s ease; }
+.link-quiet:hover { color: var(--text); }
+.cite-active { border-color: color-mix(in srgb, var(--gold) 65%, var(--line)); background: var(--surface-2); }
+.font-display { font-family: Georgia, serif; }
+.font-urdu { font-family: "Noto Nastaliq Urdu", "Noto Sans Arabic", serif; }

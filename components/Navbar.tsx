@@ -4,7 +4,7 @@ import Link from "next/link";
 import { LanguageToggle } from "./LanguageToggle";
 import { useLang } from "@/lib/lang";
 
-export function Nav() {
+export function Navbar() {
   const { t } = useLang();
 
   const links: { to: string; label: string }[] = [
@@ -25,6 +25,18 @@ export function Nav() {
         </Link>
 
         <div className="flex items-center gap-5">
+          <ul className="flex items-center gap-3 text-[13px] sm:gap-5">
+            <li>
+              <Link href="/" className="link-quiet font-urdu">
+                فتاویٰ
+              </Link>
+            </li>
+            <li>
+              <Link href="/sunnahs" className="link-quiet font-urdu">
+                سنتیں
+              </Link>
+            </li>
+          </ul>
           <ul className="hidden items-center gap-5 text-[14px] sm:flex">
             {links.map((l) => (
               <li key={l.to}>

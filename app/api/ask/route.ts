@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { BackendResponse, Citation, Confidence } from "@/lib/types";
 
-const RAG_URL = process.env.RAG_URL;
+const FATWA_API_URL = process.env.NEXT_PUBLIC_FATWA_API_URL;
 
 /** 
  * Below this cosine-distance the passage is treated as a real match.
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        if (!RAG_URL) {
+        if (!FATWA_API_URL) {
           controller.enqueue(
             sse("error", {
               message: "The verification service is not configured.",
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
           return;
         }
 
-        const upstream = await fetch(RAG_URL, {
+        const upstream = await fetch(FATWA_API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: parsed.data.query }),

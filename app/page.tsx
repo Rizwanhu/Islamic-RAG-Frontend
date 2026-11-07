@@ -4,7 +4,6 @@ import { useState } from "react";
 import { askQuestion } from "@/lib/api";
 import type { AskResult } from "@/lib/types";
 import { useLang } from "@/lib/lang";
-import { Nav } from "@/components/Nav";
 import { QueryInput } from "@/components/QueryInput";
 import { AnswerCard } from "@/components/AnswerCard";
 import { SourceCard } from "@/components/SourceCard";
@@ -32,7 +31,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen"><Nav /><main className="mx-auto w-full max-w-[1120px] px-5 py-14 sm:py-20">
+    <div className="min-h-screen"><main className="mx-auto w-full max-w-[1120px] px-5 py-14 sm:py-20">
       <section className="max-w-[760px]">
         <p className="text-[12px] uppercase tracking-[.18em] text-gold">Sanad · {t("Evidence before certainty", "یقین سے پہلے دلیل")}</p>
         <h1 dir={locale.dir} className="mt-4 font-display text-5xl leading-[1.05] text-text sm:text-7xl">{t("Ask. Retrieve. Verify.", "پوچھیے، تلاش کیجیے، تصدیق کیجیے۔")}</h1>

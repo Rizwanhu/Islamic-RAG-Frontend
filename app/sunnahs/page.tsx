@@ -93,24 +93,38 @@ export default function SunnahsPage() {
       );
 
   async function submit() {
-    const apiUrl = process.env.NEXT_PUBLIC_SUNNAH_API_URL;
-    if (!apiUrl) {
-      setError(t("The Sunnah service is not configured.", "سنتوں کی خدمت ترتیب نہیں دی گئی۔"));
-      return;
-    }
-
     setBusy(true);
     setError("");
     setResult(null);
 
     try {
-      const response = await fetch(apiUrl, {
+      console.log("[Sunnah page] Sending question to /api/sunnahs.", {
+        language: lang,
+        queryLength: query.trim().length,
+      });
+      const response = await fetch("/api/sunnahs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query, lang }),
       });
+      console.log("[Sunnah page] API response received.", {
+        status: response.status,
+        ok: response.ok,
+      });
 
       if (!response.ok) {
+        if (response.status === 503) {
+          throw new Error(t(
+            "The Sunnah service is not configured.",
+            "سنتوں کی خدمت ترتیب نہیں دی گئی۔",
+          ));
+        }
+        if (response.status === 502 || response.status === 504) {
+          throw new Error(t(
+            "Could not reach the Sunnah service. Please check that the backend is running and try again.",
+            "سنتوں کی خدمت سے رابطہ نہیں ہو سکا۔ براہِ کرم یقینی بنائیں کہ بیک اینڈ چل رہا ہے، پھر دوبارہ کوشش کریں۔",
+          ));
+        }
         throw new Error(t(
           "The Sunnah service did not return an answer. Please try again.",
           "سنتوں کی خدمت سے جواب موصول نہیں ہوا۔ دوبارہ کوشش فرمائیں۔",
@@ -120,13 +134,23 @@ export default function SunnahsPage() {
       const data: unknown = await response.json();
       const parsed = responseSchema.safeParse(data);
       if (!parsed.success) {
+        console.log("[Sunnah page] API response did not match expected shape.", {
+          issues: parsed.error.issues,
+        });
         throw new Error(t(
           "The Sunnah service returned an unexpected response.",
           "سنتوں کی خدمت نے غیر متوقع جواب دیا۔",
         ));
       }
+      console.log("[Sunnah page] Answer ready.", {
+        answerLength: parsed.data.answer.length,
+        sourceCount: parsed.data.sources.length,
+      });
       setResult(parsed.data);
     } catch (cause) {
+      console.log("[Sunnah page] Request failed.", {
+        error: cause instanceof Error ? `${cause.name}: ${cause.message}` : String(cause),
+      });
       setError(cause instanceof Error ? cause.message : t(
         "Something went wrong while sending your question.",
         "سوال بھیجنے میں مسئلہ پیش آیا۔",

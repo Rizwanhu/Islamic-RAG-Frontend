@@ -10,12 +10,14 @@ export function SourceCard({
   active = false,
   onActivate,
   showMatch = true,
+  showExcerpt = true,
   sample = false,
 }: {
   citation: Citation;
   active?: boolean;
   onActivate?: (n: number) => void;
   showMatch?: boolean;
+  showExcerpt?: boolean;
   sample?: boolean;
 }) {
   const { t } = useLang();
@@ -64,12 +66,14 @@ export function SourceCard({
         )}
       </header>
 
-      <p
-        dir={rtl ? "rtl" : "ltr"}
-        className={`mt-3 text-[14px] text-text-muted ${rtl ? "font-urdu" : ""}`}
-      >
-        {citation.excerpt}
-      </p>
+      {showExcerpt && (
+        <p
+          dir={rtl ? "rtl" : "ltr"}
+          className={`mt-3 text-[14px] text-text-muted ${rtl ? "font-urdu" : ""}`}
+        >
+          {citation.excerpt}
+        </p>
+      )}
 
       {showMatch && (
         <div className="mt-4">

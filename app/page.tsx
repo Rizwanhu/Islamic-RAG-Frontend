@@ -40,9 +40,12 @@ export default function Home() {
       <section className="mt-12"><QueryInput value={query} onChange={setQuery} onSubmit={submit} busy={busy} /></section>
       {error && <p role="alert" className="mt-5 rounded-[var(--radius-chip)] border border-red-400/40 bg-red-950/30 p-4 text-red-200">{error}</p>}
       {busy && <div className="panel mt-8 p-6"><PipelineDiagram activeKey="verify" compact /><p className="mt-5 text-center text-sm text-text-muted">{t("Contacting the verification service…", "تصدیقی خدمت سے رابطہ ہو رہا ہے…")}</p></div>}
-      {result && <section className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div>{result.confidence === "grounded" ? <AnswerCard answer={result.answer} citations={result.citations} activeCitation={activeCitation} onActivate={setActiveCitation} /> : <NeedsReviewState reason={result.citations.length ? "weak-match" : "no-sources"} sourceCount={result.citations.length} />}</div>
-        <aside className="space-y-4"><div className="panel p-5"><VerificationBadge confidence={result.confidence} sourceCount={result.citations.length} /><h2 className="mt-5 font-display text-xl text-text">{t("Retrieved sources", "دستیاب مآخذ")}</h2></div>{result.citations.map((citation) => <SourceCard key={citation.n} citation={citation} active={activeCitation === citation.n} onActivate={setActiveCitation} />)}</aside>
+      {result && <section className="mt-8 space-y-6">
+        {result.confidence === "grounded" ? <AnswerCard answer={result.answer} citations={result.citations} activeCitation={activeCitation} onActivate={setActiveCitation} /> : <NeedsReviewState reason={result.citations.length ? "weak-match" : "no-sources"} sourceCount={result.citations.length} />}
+        {result.citations.length > 0 && <aside aria-labelledby="retrieved-sources-heading" className="space-y-4">
+          <div className="panel p-5"><VerificationBadge confidence={result.confidence} sourceCount={result.citations.length} /><h2 id="retrieved-sources-heading" className="mt-5 font-display text-xl text-text">{t("Retrieved sources", "دستیاب مآخذ")}</h2></div>
+          {result.citations.map((citation) => <SourceCard key={citation.n} citation={citation} active={activeCitation === citation.n} onActivate={setActiveCitation} showExcerpt={false} showMatch={false} />)}
+        </aside>}
       </section>}
     </main>
     </div>

@@ -4,27 +4,33 @@ import { LanguageToggle } from "./LanguageToggle";
 
 const EXAMPLES: Record<"en" | "ur", string[]> = {
   en: [
+    "What are the Sunnahs of eating and drinking?",
+    "What should I recite before going to sleep?",
     "Is bank interest permissible?",
-    "How is zakat calculated on gold?",
-    "When may a traveller shorten prayer?",
   ],
   ur: [
+    "کھانے پینے کی مسنون آداب کیا ہیں؟",
+    "سونے سے پہلے کون سی دعائیں پڑھنی چاہییں؟",
     "بینک کے سود اور منافع کا شرعی حکم کیا ہے",
-    "سونے پر زکوٰۃ کس طرح واجب ہوتی ہے",
-    "سفر میں نمازِ قصر کب پڑھی جائے گی",
   ],
 };
+
+export type QuestionCategory = "all" | "sunnah" | "fatwa";
 
 export function QueryInput({
   value,
   onChange,
   onSubmit,
   busy,
+  category,
+  onCategoryChange,
 }: {
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
   busy: boolean;
+  category: QuestionCategory;
+  onCategoryChange: (category: QuestionCategory) => void;
 }) {
   const { lang, locale, t } = useLang();
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -39,9 +45,30 @@ export function QueryInput({
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <label htmlFor="sanad-query" className="text-[13px] text-text-muted">
-          {t("Your fiqh question", "آپ کا فقہی سوال")}
+          {t("Your question", "آپ کا سوال")}
         </label>
         <LanguageToggle />
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <label htmlFor="question-category" className="text-[13px] text-text-muted">
+          {t("Search in", "تلاش کریں")}
+        </label>
+        <select
+          id="question-category"
+          value={category}
+          onChange={(e) => {
+            const selected = e.currentTarget.value;
+            if (selected === "all" || selected === "sunnah" || selected === "fatwa") {
+              onCategoryChange(selected);
+            }
+          }}
+          className="recessed px-3 py-2 text-[13px] text-text outline-none focus:border-gold/60"
+        >
+          <option value="all">{t("All sources (default)", "تمام مآخذ (طے شدہ)")}</option>
+          <option value="sunnah">{t("Sunnah", "سنت")}</option>
+          <option value="fatwa">{t("Fatwa", "فتویٰ")}</option>
+        </select>
       </div>
 
       <textarea
@@ -59,8 +86,8 @@ export function QueryInput({
           }
         }}
         placeholder={t(
-          "Ask about a ruling — the answer will come only from the fatawa corpus.",
-          "کوئی مسئلہ پوچھیے — جواب صرف فتاویٰ کے ذخیرے سے دیا جائے گا۔",
+          "Ask anything about Sunnah or fiqh.",
+          "سنت یا فقہ کے بارے میں کوئی بھی سوال پوچھیے۔",
         )}
         className={[
           "recessed mt-4 w-full resize-y p-4 text-text outline-none",

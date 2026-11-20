@@ -27,13 +27,13 @@ export function Navbar() {
         <div className="flex items-center gap-5">
           <ul className="flex items-center gap-3 text-[13px] sm:gap-5">
             <li>
-              <Link href="/" className="link-quiet font-urdu">
-                فتاویٰ
+              <Link href="/fatwas" className="link-quiet">
+                {t("Fatwa", "فتاویٰ")}
               </Link>
             </li>
             <li>
-              <Link href="/sunnahs" className="link-quiet font-urdu">
-                سنتیں
+              <Link href="/sunnahs" className="link-quiet">
+                {t("Sunnah", "سنتیں")}
               </Link>
             </li>
           </ul>

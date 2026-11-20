@@ -5,6 +5,7 @@ export type BackendSource = {
   fatwa_number: string;
   category?: string;
   sub_category?: string;
+  institution?: string;
   url?: string;
   distance: number;
   snippet: string;
@@ -20,6 +21,7 @@ export type Citation = {
   url?: string;
   category?: string;
   subCategory?: string;
+  institution?: string;
   fatwaNumber: string;
 };
 

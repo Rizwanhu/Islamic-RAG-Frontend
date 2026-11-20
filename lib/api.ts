@@ -1,7 +1,11 @@
 import type { AskResult } from "./types";
 
 export function segmentAnswer(answer: string) {
-	return answer.split(/(\{\{cite:\d+\}\})/g).filter(Boolean).map((value) => {
+	const cleanedAnswer = answer.replace(
+		/\{\{cite:(?:\d+|\$\{[^{}]*\})\}\}/g,
+		(marker) => (/^\{\{cite:\d+\}\}$/.test(marker) ? marker : ""),
+	).replace(/[ \t]{2,}/g, " ");
+	return cleanedAnswer.split(/(\{\{cite:\d+\}\})/g).filter(Boolean).map((value) => {
 		const match = value.match(/^\{\{cite:(\d+)\}\}$/);
 		return match ? { kind: "citation" as const, n: Number(match[1]) } : { kind: "text" as const, value };
 	});

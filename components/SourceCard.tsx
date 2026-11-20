@@ -39,30 +39,47 @@ export function SourceCard({
         active ? "cite-active" : "",
       ].join(" ")}
     >
-      <header className="flex items-start gap-3">
-        <span
-          aria-hidden="true"
-          className="mt-[2px] inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-full border border-gold/45 bg-gold/12 px-1.5 text-[12px] text-gold"
-        >
-          {citation.n}
-        </span>
-        <div className="min-w-0 flex-1">
-          <h3
-            id={`source-title-${citation.n}`}
-            className="font-display text-[16px] leading-snug text-text"
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <span
+            aria-hidden="true"
+            className="mt-[2px] inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-full border border-gold/45 bg-gold/12 px-1.5 text-[12px] text-gold"
           >
-            {citation.source}
-          </h3>
-          {(citation.category || citation.subCategory) && (
-            <p className="mt-1 font-urdu text-[13px] leading-[2] text-text-dim" dir="rtl">
-              {[citation.category, citation.subCategory].filter(Boolean).join(" / ")}
-            </p>
-          )}
-        </div>
-        {sample && (
-          <span className="shrink-0 rounded-[var(--radius-chip)] border border-line px-2 py-0.5 text-[11px] text-text-dim">
-            {t("Sample entry", "نمونہ اندراج")}
+            {citation.n}
           </span>
+          <div className="min-w-0">
+            <h3
+              id={`source-title-${citation.n}`}
+              className="font-display text-[16px] leading-snug text-text"
+            >
+              {citation.source}
+            </h3>
+            {citation.institution && (
+              <p
+                className="mt-2 inline-flex max-w-full rounded-[var(--radius-chip)] border border-sage/35 bg-sage/10 px-2.5 py-1 text-[12px] leading-relaxed text-sage"
+                dir="auto"
+              >
+                {citation.institution}
+              </p>
+            )}
+          </div>
+        </div>
+        {(citation.category || citation.subCategory || sample) && (
+          <div className="flex shrink-0 flex-wrap items-start gap-3 sm:justify-end">
+            {(citation.category || citation.subCategory) && (
+              <p
+                className="text-left font-urdu text-[13px] leading-[2] text-text-dim sm:text-right"
+                dir="auto"
+              >
+                {[citation.category, citation.subCategory].filter(Boolean).join(" / ")}
+              </p>
+            )}
+            {sample && (
+              <span className="rounded-[var(--radius-chip)] border border-line px-2 py-0.5 text-[11px] text-text-dim">
+                {t("Sample entry", "نمونہ اندراج")}
+              </span>
+            )}
+          </div>
         )}
       </header>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { z } from "zod";
 import { askQuestion } from "@/lib/api";
 import type { AskResult } from "@/lib/types";
@@ -122,6 +123,20 @@ export default function Home() {
         <h1 dir={locale.dir} className="mt-4 font-display text-5xl leading-[1.05] text-text sm:text-7xl">{t("Ask. Retrieve. Verify.", "پوچھیے، تلاش کیجیے، تصدیق کیجیے۔")}</h1>
         <p className="mt-6 max-w-[58ch] text-[16px] leading-7 text-text-muted">{t("Ask about Sunnah or fiqh and get answers grounded in the relevant sources, with passages visible for inspection.", "سنت یا فقہ کے بارے میں سوال پوچھیے اور متعلقہ مستند ماخذ کے ساتھ جواب حاصل کیجیے۔")}</p>
       </section>
+      <section aria-label={t("Choose a collection", "مجموعہ منتخب کریں")} className="mt-10 grid max-w-[760px] gap-4 sm:grid-cols-2">
+        <Link href="/fatwas" className="panel block p-5 transition-colors hover:border-gold/40">
+          <h2 className={`text-xl text-gold ${lang === "ur" ? "font-urdu" : "font-display"}`}>{t("Fatwa", "فتویٰ")}</h2>
+          <p className={`mt-2 text-sm leading-6 text-text-muted ${lang === "ur" ? "font-urdu" : ""}`}>
+            {t("Search Islamic rulings and review their cited sources.", "شرعی مسائل کے جوابات اور ان کے مستند مآخذ تلاش کریں۔")}
+          </p>
+        </Link>
+        <Link href="/sunnahs" className="panel block p-5 transition-colors hover:border-gold/40">
+          <h2 className={`text-xl text-gold ${lang === "ur" ? "font-urdu" : "font-display"}`}>{t("Sunnah", "سنتیں")}</h2>
+          <p className={`mt-2 text-sm leading-6 text-text-muted ${lang === "ur" ? "font-urdu" : ""}`}>
+            {t("Explore answers and passages from Pyarey Nabi ki Pyari Sunnatein.", "پیارے نبی ﷺ کی پیاری سنتیں کتاب سے جوابات اور اقتباسات تلاش کریں۔")}
+          </p>
+        </Link>
+      </section>
       <section className="mt-12"><QueryInput value={query} onChange={setQuery} onSubmit={submit} busy={busy} category={category} onCategoryChange={setCategory} /></section>
       {errors.length > 0 && <div role="alert" className="mt-5 space-y-2 rounded-[var(--radius-chip)] border border-red-400/40 bg-red-950/30 p-4 text-red-200">{errors.map((error) => <p key={error}>{error}</p>)}</div>}
       {busy && <div className="panel mt-8 p-6"><PipelineDiagram activeKey="verify" compact /><p className="mt-5 text-center text-sm text-text-muted">{t("Searching the selected sources…", "منتخب مآخذ میں تلاش جاری ہے…")}</p></div>}
@@ -129,8 +144,8 @@ export default function Home() {
         {result.fatwa && <section aria-labelledby="fatwa-answer-heading" className="space-y-6">
           <h2 id="fatwa-answer-heading" className="font-display text-2xl text-gold">{t("Fatwa answer", "فتویٰ کا جواب")}</h2>
           {result.fatwa.confidence === "grounded" ? <AnswerCard answer={result.fatwa.answer} citations={result.fatwa.citations} activeCitation={activeCitation} onActivate={setActiveCitation} /> : <NeedsReviewState reason={result.fatwa.citations.length ? "weak-match" : "no-sources"} sourceCount={result.fatwa.citations.length} />}
-          {result.fatwa.citations.length > 0 && <aside aria-labelledby="retrieved-sources-heading" className="space-y-4">
-            <div className="panel p-5"><VerificationBadge confidence={result.fatwa.confidence} sourceCount={result.fatwa.citations.length} /><h3 id="retrieved-sources-heading" className="mt-5 font-display text-xl text-text">{t("Retrieved fatwa sources", "دستیاب فتاویٰ کے مآخذ")}</h3></div>
+          {result.fatwa.citations.length > 0 && <aside aria-label={t("Fatwa verification and sources", "فتویٰ کی تصدیق اور مآخذ")} className="space-y-4">
+            <div><VerificationBadge confidence={result.fatwa.confidence} sourceCount={result.fatwa.citations.length} /></div>
             {result.fatwa.citations.map((citation) => <SourceCard key={citation.n} citation={citation} active={activeCitation === citation.n} onActivate={setActiveCitation} showExcerpt={false} showMatch={false} />)}
           </aside>}
         </section>}

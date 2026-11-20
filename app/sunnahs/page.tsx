@@ -41,6 +41,25 @@ const QUESTION_SUGGESTIONS = [
 
 const SUGGESTIONS_PER_VIEW = 4;
 const SUGGESTION_OFFSET_KEY = "sunnah-suggestion-offset";
+const SUNNAH_BOOK_TITLE = {
+  en: "Pyarey Nabi ki Pyari Sunnatein",
+  ur: "پیارے نبی ﷺ کی پیاری سنتیں",
+};
+
+function getSectionTitle(section?: string) {
+  const title = section?.trim();
+  return title && !/\$\{[^}]*\}|\{\{[^}]*\}\}/.test(title) ? title : null;
+}
+
+function normalizePassageText(value: string) {
+  return value.normalize("NFKC").toLowerCase().replace(/[\p{M}\p{P}\p{S}\p{Z}\p{Cf}]/gu, "");
+}
+
+function isPassageAlreadyInAnswer(answer: string, snippet: string) {
+  const normalizedSnippet = normalizePassageText(snippet);
+  return normalizedSnippet.length >= 40
+    && normalizePassageText(answer).includes(normalizedSnippet);
+}
 
 function getNextSuggestionOffset() {
   try {
@@ -62,7 +81,7 @@ const responseSchema = z.object({
   answer: z.string(),
   sources: z.array(
     z.object({
-      section: z.string(),
+      section: z.string().optional(),
       snippet: z.string(),
     }),
   ),
@@ -163,16 +182,13 @@ export default function SunnahsPage() {
   return (
     <main className="mx-auto w-full max-w-[1120px] px-5 py-14 sm:py-20" dir={locale.dir} lang={locale.code}>
       <section className="max-w-[800px]">
-        <p className={`text-[15px] text-gold ${lang === "ur" ? "font-urdu" : ""}`}>
-          {t("Pyarey Nabi ki Pyari Sunnatein", "پیارے نبی ﷺ کی پیاری سنتیں")}
-        </p>
         <h1 className={`mt-5 text-4xl leading-[1.8] text-text sm:text-6xl ${lang === "ur" ? "font-urdu" : "font-display"}`}>
-          {t("The Beloved Prophet’s Beautiful Sunnahs", "پیارے نبی ﷺ کی پیاری سنتیں")}
+          {t(SUNNAH_BOOK_TITLE.en, SUNNAH_BOOK_TITLE.ur)}
         </h1>
         <p className={`mt-5 max-w-[60ch] text-[17px] leading-[2.3] text-text-muted ${lang === "ur" ? "font-urdu" : ""}`}>
           {t(
-            "Ask about the Sunnahs using references from the book Pyarey Nabi ki Pyari Sunnatein.",
-            "پیارے نبی ﷺ کی پیاری سنتیں کتاب کے مستند حوالوں سے سنتوں کے بارے میں سوال پوچھیے۔",
+            "Ask a question to find the relevant Sunnah and its passage.",
+            "متعلقہ سنت اور اس کا اقتباس تلاش کرنے کے لیے سوال پوچھیے۔",
           )}
         </p>
       </section>
@@ -269,16 +285,28 @@ export default function SunnahsPage() {
           </article>
           <aside className="space-y-4">
             <h2 className={`text-xl text-text ${lang === "ur" ? "font-urdu" : ""}`}>
-              {t("Relevant passages from the book", "کتاب سے متعلقہ اقتباسات")}
+              {t(SUNNAH_BOOK_TITLE.en, SUNNAH_BOOK_TITLE.ur)}
             </h2>
-            {result.sources.map((source, index) => (
-              <article key={`${source.section}-${index}`} className="rounded-[var(--radius-source)] border border-line bg-surface p-5">
-                <h3 dir="auto" className={`text-[16px] leading-[2] text-gold ${lang === "ur" ? "font-urdu" : ""}`}>{source.section}</h3>
-                <p dir="auto" className={`mt-3 whitespace-pre-wrap text-[15px] leading-[2.3] text-text-muted ${lang === "ur" ? "font-urdu" : ""}`}>
-                  {source.snippet}
-                </p>
-              </article>
-            ))}
+            {result.sources.map((source, index) => {
+              const sectionTitle = getSectionTitle(source.section);
+              const duplicateSnippet = isPassageAlreadyInAnswer(result.answer, source.snippet);
+              if (duplicateSnippet && !sectionTitle) return null;
+
+              return (
+                <article key={`${source.section ?? "source"}-${index}`} className="rounded-[var(--radius-source)] border border-line bg-surface p-5">
+                  {sectionTitle && (
+                    <h3 dir="auto" className={`text-[15px] leading-[2] text-gold ${lang === "ur" ? "font-urdu" : ""}`}>
+                      {sectionTitle}
+                    </h3>
+                  )}
+                  {!duplicateSnippet && (
+                    <p dir="auto" className={`mt-3 whitespace-pre-wrap text-[15px] leading-[2.3] text-text-muted ${lang === "ur" ? "font-urdu" : ""}`}>
+                      {source.snippet}
+                    </p>
+                  )}
+                </article>
+              );
+            })}
           </aside>
         </section>
       )}

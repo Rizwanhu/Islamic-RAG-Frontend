@@ -19,21 +19,44 @@ const bodySchema = z.object({
 const NO_MATCH_MARKERS = ["دستیاب نہیں", "not available", "not found in"];
 
 function normalizeUrl(url?: string) {
-  const markdown = url?.match(/^\[[^\]]+\]\((https?:\/\/[^)]+)\)\$/);
+  const markdown = url?.match(/^\[[^\]]+\]\((https?:\/\/[^)]+)\)$/);
   return markdown?.[1] ?? url;
 }
 
+function institutionFromUrl(url?: string) {
+  if (!url) return undefined;
+
+  let hostname: string;
+  try {
+    hostname = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return undefined;
+  }
+
+  if (hostname === "binoria.edu.pk" || hostname.endsWith(".binoria.edu.pk")) {
+    return "جامعہ علوم اسلامیہ بنوری ٹاؤن";
+  }
+  if (hostname.includes("onlinefatwa")) {
+    return "آن لائن فتویٰ";
+  }
+  return hostname;
+}
+
 function toCitations(sources: BackendResponse["sources"]): Citation[] {
-  return sources.map((s, i) => ({
-    n: i + 1,
-    source: `Fatwa ${s.fatwa_number}${s.sub_category ? ` · \${s.sub_category}` : ""}`,
-    excerpt: s.snippet,
-    matchScore: Math.max(0, Math.min(1, 1 - s.distance)),
-    url: normalizeUrl(s.url),
-    category: s.category,
-    subCategory: s.sub_category,
-    fatwaNumber: s.fatwa_number,
-  }));
+  return sources.map((s, i) => {
+    const url = normalizeUrl(s.url);
+    return {
+      n: i + 1,
+      source: `Fatwa ${s.fatwa_number}`,
+      institution: s.institution?.trim() || institutionFromUrl(url),
+      excerpt: s.snippet,
+      matchScore: Math.max(0, Math.min(1, 1 - s.distance)),
+      url,
+      category: s.category,
+      subCategory: s.sub_category,
+      fatwaNumber: s.fatwa_number,
+    };
+  });
 }
 
 function gradeConfidence(answer: string, cites: Citation[]): Confidence {
@@ -53,7 +76,7 @@ function withCitationMarkers(answer: string, cites: Citation[], confidence: Conf
   if (/\{\{cite:\d+\}\}/.test(answer)) return answer;
   const used = cites.filter((c) => 1 - c.matchScore <= WEAK_DISTANCE).slice(0, 5);
   if (used.length === 0) return answer;
-  return `${answer.trim()} ${used.map((c) => `{{cite:\${c.n}}}`).join("")}`;
+  return `${answer.trim()} ${used.map((c) => `{{cite:${c.n}}}`).join("")}`;
 }
 
 const sse = (event: string, data: unknown) =>

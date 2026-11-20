@@ -80,7 +80,7 @@ export function QueryInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && value.trim() && !busy) {
+          if (e.key === "Enter" && !e.shiftKey && value.trim() && !busy) {
             e.preventDefault();
             onSubmit();
           }

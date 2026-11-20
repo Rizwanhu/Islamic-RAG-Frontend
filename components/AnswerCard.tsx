@@ -11,12 +11,14 @@ export function AnswerCard({
   activeCitation,
   onActivate,
   streaming = false,
+  idPrefix,
 }: {
   answer: string;
   citations: Citation[];
   activeCitation: number | null;
   onActivate: (n: number) => void;
   streaming?: boolean;
+  idPrefix?: string;
 }) {
   const { t } = useLang();
   const rtl = isRtlText(answer);
@@ -42,6 +44,7 @@ export function AnswerCard({
               sourceTitle={citations.find((c) => c.n === seg.n)?.source ?? `#${seg.n}`}
               active={activeCitation === seg.n}
               onActivate={onActivate}
+              idPrefix={idPrefix}
             />
           ),
         )}

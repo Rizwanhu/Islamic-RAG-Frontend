@@ -5,20 +5,23 @@ export function CitationMarker({
   sourceTitle,
   active,
   onActivate,
+  idPrefix,
 }: {
   n: number;
   sourceTitle: string;
   active: boolean;
   onActivate: (n: number) => void;
+  idPrefix?: string;
 }) {
   const { t } = useLang();
+  const markerId = idPrefix ? `${idPrefix}-${n}` : String(n);
 
   return (
     <button
       type="button"
-      id={`cite-${n}`}
+      id={`cite-${markerId}`}
       aria-pressed={active}
-      aria-controls={`source-${n}`}
+      aria-controls={`source-${markerId}`}
       aria-label={t(
         `Citation ${n}: highlight source ${sourceTitle}`,
         `حوالہ ${n}: ماخذ ${sourceTitle} نمایاں کریں`,

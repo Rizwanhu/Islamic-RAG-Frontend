@@ -12,6 +12,7 @@ export function SourceCard({
   showMatch = true,
   showExcerpt = true,
   sample = false,
+  idPrefix,
 }: {
   citation: Citation;
   active?: boolean;
@@ -19,16 +20,18 @@ export function SourceCard({
   showMatch?: boolean;
   showExcerpt?: boolean;
   sample?: boolean;
+  idPrefix?: string;
 }) {
   const { t } = useLang();
   const rtl = isRtlText(citation.excerpt);
   const pct = Math.round(citation.matchScore * 100);
   const interactive = Boolean(onActivate);
+  const sourceId = `source-${idPrefix ? `${idPrefix}-` : ""}${citation.n}`;
 
   return (
     <article
-      id={`source-${citation.n}`}
-      aria-labelledby={`source-title-${citation.n}`}
+      id={sourceId}
+      aria-labelledby={`${sourceId}-title`}
       tabIndex={interactive ? 0 : undefined}
       onMouseEnter={() => onActivate?.(citation.n)}
       onFocus={() => onActivate?.(citation.n)}
@@ -49,7 +52,7 @@ export function SourceCard({
           </span>
           <div className="min-w-0">
             <h3
-              id={`source-title-${citation.n}`}
+              id={`${sourceId}-title`}
               className="font-display text-[16px] leading-snug text-text"
             >
               {citation.source}

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useLang } from "@/lib/lang";
+import { SunnahAnswerCard } from "@/components/SunnahAnswerCard";
 
 const QUESTION_SUGGESTIONS = [
   {
@@ -79,6 +80,7 @@ function getNextSuggestionOffset() {
 
 const responseSchema = z.object({
   answer: z.string(),
+  english_translation: z.string().optional(),
   sources: z.array(
     z.object({
       section: z.string().optional(),
@@ -88,11 +90,12 @@ const responseSchema = z.object({
 });
 
 type SunnahResponse = z.infer<typeof responseSchema>;
+type SunnahResult = SunnahResponse & { query: string };
 
 export default function SunnahsPage() {
   const { lang, locale, t } = useLang();
   const [query, setQuery] = useState("");
-  const [result, setResult] = useState<SunnahResponse | null>(null);
+  const [result, setResult] = useState<SunnahResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [suggestionOffset, setSuggestionOffset] = useState<number | null>(null);
@@ -165,7 +168,7 @@ export default function SunnahsPage() {
         answerLength: parsed.data.answer.length,
         sourceCount: parsed.data.sources.length,
       });
-      setResult(parsed.data);
+      setResult({ ...parsed.data, query: query.trim() });
     } catch (cause) {
       console.log("[Sunnah page] Request failed.", {
         error: cause instanceof Error ? `${cause.name}: ${cause.message}` : String(cause),
@@ -275,14 +278,16 @@ export default function SunnahsPage() {
 
       {result && (
         <section className="mt-8 grid max-w-[1120px] gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <article className="panel p-6">
+          <section className="space-y-4">
             <h2 className={`text-2xl text-gold ${lang === "ur" ? "font-urdu" : ""}`}>
               {t("Answer", "جواب")}
             </h2>
-            <p dir="auto" className={`mt-4 whitespace-pre-wrap text-[17px] leading-[2.4] text-text ${lang === "ur" ? "font-urdu" : ""}`}>
-              {result.answer}
-            </p>
-          </article>
+            <SunnahAnswerCard
+              answer={result.answer}
+              englishTranslation={result.english_translation}
+              query={result.query}
+            />
+          </section>
           <aside className="space-y-4">
             <h2 className={`text-xl text-text ${lang === "ur" ? "font-urdu" : ""}`}>
               {t(SUNNAH_BOOK_TITLE.en, SUNNAH_BOOK_TITLE.ur)}

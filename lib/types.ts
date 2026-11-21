@@ -11,7 +11,11 @@ export type BackendSource = {
   snippet: string;
 };
 
-export type BackendResponse = { answer: string; sources: BackendSource[] };
+export type BackendResponse = {
+  answer: string;
+  english_translation?: string;
+  sources: BackendSource[];
+};
 
 export type Citation = {
   n: number;
@@ -25,4 +29,9 @@ export type Citation = {
   fatwaNumber: string;
 };
 
-export type AskResult = { answer: string; confidence: Confidence; citations: Citation[] };
+export type AskResult = {
+  answer: string;
+  englishTranslation?: string;
+  confidence: Confidence;
+  citations: Citation[];
+};

@@ -40,5 +40,11 @@ export async function askQuestion(query: string, lang: "en" | "ur", signal?: Abo
 	}
 	if (!result) throw new Error("The verification service returned no answer.");
 	const completed = result as AskResult;
-	return { answer: completed.answer, confidence: completed.confidence, citations: completed.citations, streamed };
+	return {
+		answer: completed.answer,
+		englishTranslation: completed.englishTranslation,
+		confidence: completed.confidence,
+		citations: completed.citations,
+		streamed,
+	};
 }

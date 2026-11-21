@@ -469,6 +469,7 @@ export default function ComparePage() {
                         {comparison.fatwa.confidence === "grounded" ? (
                           <AnswerCard
                             answer={comparison.fatwa.answer}
+                            englishTranslation={comparison.fatwa.englishTranslation}
                             citations={comparison.fatwa.citations}
                             activeCitation={activeCitations[comparison.id] ?? null}
                             onActivate={(citation) => setActiveCitations((current) => ({ ...current, [comparison.id]: citation }))}

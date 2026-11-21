@@ -151,6 +151,7 @@ export default function FatwasPage() {
           {result.confidence === "grounded" ? (
             <AnswerCard
               answer={result.answer}
+              englishTranslation={result.englishTranslation}
               citations={result.citations}
               activeCitation={activeCitation}
               onActivate={setActiveCitation}

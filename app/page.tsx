@@ -12,9 +12,11 @@ import { SourceCard } from "@/components/SourceCard";
 import { NeedsReviewState } from "@/components/NeedsReviewState";
 import { VerificationBadge } from "@/components/VerificationBadge";
 import { PipelineDiagram } from "@/components/PipelineDiagram";
+import { SunnahAnswerCard } from "@/components/SunnahAnswerCard";
 
 const sunnahResponseSchema = z.object({
   answer: z.string(),
+  english_translation: z.string().optional(),
   sources: z.array(
     z.object({
       section: z.string().optional(),
@@ -227,7 +229,9 @@ export default function Home() {
         </main>
       ) : (
         <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[1120px] flex-col px-5 pb-2 pt-8">
-          <section className="mx-auto w-full max-w-[850px] flex-1">
+          <div className="mx-auto grid w-full flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_220px]">
+            <div className="flex min-w-0 flex-col">
+              <section className="min-w-0 flex-1">
             <header className="mb-8 flex items-center justify-between gap-4">
               <div>
                 <p className="text-[11px] uppercase tracking-[.16em] text-gold">Sanad</p>
@@ -249,33 +253,6 @@ export default function Home() {
               <p role="alert" className="mb-5 rounded-[var(--radius-chip)] border border-red-400/40 bg-red-950/30 p-3 text-[13px] text-red-200">
                 {historyError}
               </p>
-            )}
-
-            {pinnedMessages.length > 0 && (
-              <aside aria-label={t("Pinned answers", "پن کیے گئے جوابات")} className="panel mb-6 p-4">
-                <h2 className={`text-[14px] text-gold ${lang === "ur" ? "font-urdu" : ""}`}>
-                  {t("Pinned answers", "پن کیے گئے جوابات")}
-                </h2>
-                <ul className="mt-3 space-y-2">
-                  {pinnedMessages.map((turn) => (
-                    <li key={turn.id} className="flex items-center justify-between gap-3 rounded-[var(--radius-chip)] border border-line bg-ink-2 px-3 py-2">
-                      <a href={`#turn-${turn.id}`} className="min-w-0 text-[13px] text-text-muted hover:text-text">
-                        <span className="block truncate">{turn.query}</span>
-                        <span className="mt-1 block truncate text-text-dim">
-                          {[turn.fatwa?.answer, turn.sunnah?.answer].filter(Boolean).join(" · ")}
-                        </span>
-                      </a>
-                      <button
-                        type="button"
-                        onClick={() => setPinnedTurns((previous) => previous.filter((id) => id !== turn.id))}
-                        className="shrink-0 text-[12px] text-text-dim hover:text-text"
-                      >
-                        {t("Unpin", "پن ہٹائیں")}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </aside>
             )}
 
             <section aria-label={t("Conversation", "گفتگو")} className="space-y-8">
@@ -358,6 +335,7 @@ export default function Home() {
                             {turn.fatwa.confidence === "grounded" ? (
                               <AnswerCard
                                 answer={turn.fatwa.answer}
+                                englishTranslation={turn.fatwa.englishTranslation}
                                 citations={turn.fatwa.citations}
                                 activeCitation={activeCitations[turn.id] ?? null}
                                 onActivate={(citation) => setActiveCitations((previous) => ({ ...previous, [turn.id]: citation }))}
@@ -392,11 +370,11 @@ export default function Home() {
                             <h3 id={`sunnah-answer-heading-${turn.id}`} className={`text-[16px] text-gold ${lang === "ur" ? "font-urdu" : ""}`}>
                               {t("Sunnah answer", "سنت کا جواب")}
                             </h3>
-                            <article className="rounded-[var(--radius-source)] border border-line bg-surface p-4">
-                              <p dir="auto" className={`whitespace-pre-wrap text-[15px] leading-[2] text-text ${lang === "ur" ? "font-urdu" : ""}`}>
-                                {turn.sunnah.answer}
-                              </p>
-                            </article>
+                            <SunnahAnswerCard
+                              answer={turn.sunnah.answer}
+                              englishTranslation={turn.sunnah.english_translation}
+                              query={turn.query}
+                            />
                             {turn.sunnah.sources.length > 0 && (
                               <aside aria-label={t("Sunnah references", "سنت کے حوالے")} className="space-y-3">
                                 <h4 className={`text-[12px] text-text-dim ${lang === "ur" ? "font-urdu" : ""}`}>
@@ -429,9 +407,9 @@ export default function Home() {
               })}
             </section>
             <div ref={conversationEnd} aria-hidden="true" className="h-4 scroll-mb-40" />
-          </section>
+              </section>
 
-          <div className="sticky bottom-0 z-20 mx-auto w-full max-w-[850px] bg-ink/90 pb-3 pt-3 backdrop-blur-md">
+          <div className="sticky bottom-0 z-20 w-full bg-ink/90 pb-3 pt-3 backdrop-blur-md">
             <form
               onSubmit={(event) => {
                 event.preventDefault();
@@ -486,6 +464,38 @@ export default function Home() {
                 </button>
               </div>
             </form>
+          </div>
+            </div>
+
+            {pinnedMessages.length > 0 && (
+              <aside
+                aria-label={t("Pinned answers", "پن کیے گئے جوابات")}
+                className="panel h-fit p-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto"
+              >
+                <h2 className={`text-[14px] text-gold ${lang === "ur" ? "font-urdu" : ""}`}>
+                  {t("Pinned answers", "پن کیے گئے جوابات")}
+                </h2>
+                <ul className="mt-3 space-y-2">
+                  {pinnedMessages.map((turn) => (
+                    <li key={turn.id} className="flex items-center justify-between gap-2 rounded-[var(--radius-chip)] border border-line bg-ink-2 px-3 py-2">
+                      <a href={`#turn-${turn.id}`} className="min-w-0 text-[13px] text-text-muted hover:text-text">
+                        <span className="block truncate">{turn.query}</span>
+                        <span className="mt-1 block truncate text-text-dim">
+                          {[turn.fatwa?.answer, turn.sunnah?.answer].filter(Boolean).join(" · ")}
+                        </span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => setPinnedTurns((previous) => previous.filter((id) => id !== turn.id))}
+                        className="shrink-0 text-[12px] text-text-dim hover:text-text"
+                      >
+                        {t("Unpin", "پن ہٹائیں")}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+            )}
           </div>
         </main>
       )}

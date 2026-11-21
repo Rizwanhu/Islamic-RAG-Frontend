@@ -124,6 +124,7 @@ export async function POST(request: Request) {
         const citations = toCitations(data.sources ?? []);
         const confidence = gradeConfidence(data.answer ?? "", citations);
         const answer = withCitationMarkers(data.answer ?? "", citations, confidence);
+        const englishTranslation = data.english_translation?.trim() || undefined;
 
         // Progressive render: emit the answer in word-sized chunks if grounded
         if (confidence === "grounded") {
@@ -140,7 +141,12 @@ export async function POST(request: Request) {
           if (buf) controller.enqueue(sse("text", { text: buf }));
         }
 
-        controller.enqueue(sse("result", { answer, confidence, citations }));
+        controller.enqueue(sse("result", {
+          answer,
+          englishTranslation,
+          confidence,
+          citations,
+        }));
       } catch {
         controller.enqueue(
           sse("error", {

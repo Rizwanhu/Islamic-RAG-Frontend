@@ -14,6 +14,7 @@ export type BackendSource = {
 export type BackendResponse = {
   answer: string;
   english_translation?: string;
+  englishTranslation?: string;
   sources: BackendSource[];
 };
 

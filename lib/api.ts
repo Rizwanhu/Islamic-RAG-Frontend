@@ -18,7 +18,7 @@ export async function askQuestion(query: string, lang: "en" | "ur", signal?: Abo
 	const decoder = new TextDecoder();
 	let buffer = "";
 	let streamed = "";
-	let result: AskResult | null = null;
+	let result: (AskResult & { english_translation?: string }) | null = null;
 	const consume = (chunk: string) => {
 		buffer += chunk;
 		const events = buffer.split("\n\n");
@@ -27,9 +27,15 @@ export async function askQuestion(query: string, lang: "en" | "ur", signal?: Abo
 			const eventName = event.match(/^event: (.+)$/m)?.[1];
 			const data = event.match(/^data: (.+)$/m)?.[1];
 			if (!eventName || !data) continue;
-			const payload = JSON.parse(data) as { text?: string; message?: string } & Partial<AskResult>;
+			const payload = JSON.parse(data) as {
+				text?: string;
+				message?: string;
+				english_translation?: string;
+			} & Partial<AskResult>;
 			if (eventName === "text") streamed += payload.text ?? "";
-			if (eventName === "result") result = payload as AskResult;
+			if (eventName === "result") {
+				result = payload as AskResult & { english_translation?: string };
+			}
 			if (eventName === "error") throw new Error(payload.message ?? "The verification service failed.");
 		}
 	};
@@ -39,10 +45,10 @@ export async function askQuestion(query: string, lang: "en" | "ur", signal?: Abo
 		consume(decoder.decode(value, { stream: true }));
 	}
 	if (!result) throw new Error("The verification service returned no answer.");
-	const completed = result as AskResult;
+	const completed = result as unknown as AskResult & { english_translation?: string };
 	return {
 		answer: completed.answer,
-		englishTranslation: completed.englishTranslation,
+		englishTranslation: completed.englishTranslation ?? completed.english_translation,
 		confidence: completed.confidence,
 		citations: completed.citations,
 		streamed,

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLang } from "@/lib/lang";
+import { BoldText } from "./BoldText";
 
 const AUTHOR = {
   en: "Maulana Shah Hakim Muhammad Akhtar",
@@ -100,7 +101,7 @@ export function SunnahAnswerCard({
             {t("English translation", "انگریزی ترجمہ")}
           </p>
           <p className="mt-2 whitespace-pre-wrap text-[15px] leading-[1.75] text-text">
-            {translation}
+            <BoldText>{translation}</BoldText>
           </p>
         </div>
       )}

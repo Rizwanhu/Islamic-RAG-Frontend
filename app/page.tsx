@@ -15,17 +15,21 @@ import { PipelineDiagram } from "@/components/PipelineDiagram";
 import { SunnahAnswerCard } from "@/components/SunnahAnswerCard";
 
 const sunnahResponseSchema = z.object({
-  answer: z.string(),
-  english_translation: z.string().optional(),
+  answer: z.string().nullable().optional(),
+  english_translation: z.string().nullable().optional(),
   sources: z.array(
     z.object({
       section: z.string().optional(),
       snippet: z.string(),
     }),
-  ),
+  ).nullable().optional(),
 });
 
-type SunnahResponse = z.infer<typeof sunnahResponseSchema>;
+type SunnahResponse = {
+  answer: string;
+  english_translation?: string;
+  sources: Array<{ section?: string; snippet: string }>;
+};
 
 type ConversationTurn = {
   id: number;
@@ -57,7 +61,7 @@ function isPassageAlreadyInAnswer(answer: string, snippet: string) {
     && normalizePassageText(answer).includes(normalizedSnippet);
 }
 
-async function askSunnah(query: string, lang: "en" | "ur"): Promise<SunnahResponse> {
+async function askSunnah(query: string, lang: "en" | "ur"): Promise<SunnahResponse | null> {
   const response = await fetch("/api/sunnahs", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -74,11 +78,26 @@ async function askSunnah(query: string, lang: "en" | "ur"): Promise<SunnahRespon
     throw new Error("The Sunnah service did not return an answer. Please try again.");
   }
 
-  const parsed = sunnahResponseSchema.safeParse(await response.json());
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("The Sunnah service returned an unexpected response.");
+  }
+
+  const parsed = sunnahResponseSchema.safeParse(data);
   if (!parsed.success) {
     throw new Error("The Sunnah service returned an unexpected response.");
   }
-  return parsed.data;
+
+  const answer = parsed.data.answer?.trim();
+  if (!answer) return null;
+
+  return {
+    answer,
+    english_translation: parsed.data.english_translation?.trim() || undefined,
+    sources: parsed.data.sources ?? [],
+  };
 }
 
 function settle<T>(request: Promise<T> | null) {
@@ -228,9 +247,9 @@ export default function Home() {
           </section>
         </main>
       ) : (
-        <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[1120px] flex-col px-5 pb-2 pt-8">
-          <div className="mx-auto grid w-full flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_220px]">
-            <div className="flex min-w-0 flex-col">
+        <main className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[1440px] flex-col px-5 pb-2 pt-8">
+          <div className={`mx-auto grid w-full max-w-[1400px] flex-1 gap-6 ${pinnedMessages.length > 0 ? "lg:grid-cols-[minmax(0,1fr)_250px]" : "lg:grid-cols-1"}`}>
+            <div className={`mx-auto flex min-w-0 flex-col ${pinnedMessages.length > 0 ? "w-full" : "w-full max-w-[1120px]"}`}>
               <section className="min-w-0 flex-1">
             <header className="mb-8 flex items-center justify-between gap-4">
               <div>
@@ -470,7 +489,7 @@ export default function Home() {
             {pinnedMessages.length > 0 && (
               <aside
                 aria-label={t("Pinned answers", "پن کیے گئے جوابات")}
-                className="panel h-fit p-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto"
+                className="panel h-fit w-full p-4 lg:sticky lg:top-24 lg:w-[250px] lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto"
               >
                 <h2 className={`text-[14px] text-gold ${lang === "ur" ? "font-urdu" : ""}`}>
                   {t("Pinned answers", "پن کیے گئے جوابات")}

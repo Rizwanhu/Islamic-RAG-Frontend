@@ -124,7 +124,10 @@ export async function POST(request: Request) {
         const citations = toCitations(data.sources ?? []);
         const confidence = gradeConfidence(data.answer ?? "", citations);
         const answer = withCitationMarkers(data.answer ?? "", citations, confidence);
-        const englishTranslation = data.english_translation?.trim() || undefined;
+        const englishTranslation =
+          data.english_translation?.trim()
+          || data.englishTranslation?.trim()
+          || undefined;
 
         // Progressive render: emit the answer in word-sized chunks if grounded
         if (confidence === "grounded") {

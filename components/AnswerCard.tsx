@@ -5,6 +5,7 @@ import { segmentAnswer } from "@/lib/api";
 import type { Citation } from "@/lib/types";
 import { isRtlText, useLang } from "@/lib/lang";
 import { CitationMarker } from "./CitationMarker";
+import { BoldText } from "./BoldText";
 
 export function AnswerCard({
   answer,
@@ -54,7 +55,7 @@ export function AnswerCard({
       >
         {segments.map((seg, i) =>
           seg.kind === "text" ? (
-            <span key={i}>{seg.value}</span>
+            <BoldText key={i}>{seg.value}</BoldText>
           ) : (
             <CitationMarker
               key={i}
@@ -82,7 +83,7 @@ export function AnswerCard({
           <div className="mt-3 whitespace-pre-wrap text-[16px] leading-[1.75] text-text">
             {segmentAnswer(englishTranslation).map((seg, i) =>
               seg.kind === "text" ? (
-                <span key={i}>{seg.value}</span>
+                <BoldText key={i}>{seg.value}</BoldText>
               ) : (
                 <CitationMarker
                   key={i}
